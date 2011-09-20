@@ -59,3 +59,24 @@ def with_new_extension(path, new_ext):
 def with_new_parent(path, new_dir):
     "Returns the path after changing the parent directory."
     return make_new_name(path, new_dir=new_dir)
+    
+def getsize(path, ignorefunc=None):
+    """Returns size of a file or directory, ignoring contents based on the passed function.
+
+    The UNIX system call used by os.path.getsize() doesn't compute the size of a directory
+    recursively. This remedies the problem by providing a uniform interface for both files and
+    directories.
+    
+    The parameter ignorefunc must be a boolean function that takes a path as parameter. It must
+    return True iff the given object should be ignored for the purposes of computing size.
+    """
+    if os.path.isfile(path):
+        return os.path.getsize(path)
+    ret = 0
+    for dirpath, dirnames, filenames in os.walk(path):
+        for filename in filenames:
+            fpath = os.path.join(dirpath, filename)
+            if ignorefunc and ignorefunc(fpath):
+                continue
+            ret += os.path.getsize(fpath)
+    return ret
