@@ -10,6 +10,7 @@ Allows extraction of:
 - Tagged sentences
 """
 
+import nltk
 import nltk.data
 import nltk.tokenize
 import nltk.tag.util
@@ -135,13 +136,49 @@ def tagged_strings(text, realign_boundaries=True):
     """
     return list(xtagged_strings(text, realign_boundaries))
 
-
-def tag_tuples(sentence):
+def tag(sentence):
     tokenizer, tagger = get_tokenizer(), get_tagger()
     return tagger.tag(tokenizer.tokenize(sentence))
 
-def tag_string(sentence):
-    return to_tagged_string(tag_tuples(sentence))
+def tag_as_string(sentence):
+    return to_tagged_string(tag(sentence))
 
-def to_tagged_string(tagged_sentence):
-    return ' '.join(nltk.tag.util.tuple2str(tup) for tup in tagged_sentence)
+def to_tagged_string(tagged_tuples):
+    return ' '.join(nltk.tag.util.tuple2str(tup) for tup in tagged_tuples)
+
+def words_with_tags(tagged_tuples, tag_list):
+    """Returns a set consisting of all words in this tagged sentence that have any of the specified
+    tags.
+    """
+    return set(word for (word, tag) in tagged_tuples if tag in tag_list)
+
+
+def tag_freq(text, tag_list):
+    """Returns an nltk.FreqDist representing the frequencies of every word that has one of these
+    tags.
+
+    Note that this method does not distinguish between different tags for the same word. Thus, if
+    the word 'fleet' occurs 2 times as NN, and 3 times as JJ, the resulting FreqDist will assign a
+    count of 5 to it. See tag_cond_freq() if you want to distinguish between the two.
+    """
+    fd = nltk.FreqDist()
+    for tagged_sentence in xtagged_tuples(text):
+        for word, tag in tagged_sentence:
+            if tag in tag_list:
+                fd.inc(word)
+    return fd
+
+def tag_cond_freq(text, tag_list):
+    """Returns an nltk.FreqDist representing the frequencies of every word that has one of these
+    tags.
+
+    Note that this method distinguishes between different tags for the same word. Thus, if the word
+    'fleet' occurs 2 times as NN, and 3 times as JJ, the resulting ConditionalFreqDist will not sum
+    the two counts. Each will be stored under a separate condition, namely the associated tag.
+    """
+    cfd = nltk.ConditionalFreqDist()
+    for tagged_sentence in xtagged_tuples(text):
+        for word, tag in tagged_sentence:
+            if tag in tag_list:
+                cfd[tag].inc(word)
+    return cfd
