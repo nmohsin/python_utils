@@ -18,7 +18,7 @@ def connection(host, uname, pwd, dbname):
     conn = mdb.connect(host, uname, pwd, dbname)
     return conn
 
-def encode_field_pair(field_pair, primary_key, auto_inc=None):
+def encode_field_pair(field_pair, primary_key, auto_inc=None, defaults=None):
     """Encodes a (field_name, type_description) pair as a string for the SQL CREATE TABLE
     statement. The primary key and auto-incrementing field (if any) are to be specified by name.
 
@@ -31,9 +31,11 @@ def encode_field_pair(field_pair, primary_key, auto_inc=None):
         ret += ' PRIMARY KEY'
     if field_name == auto_inc:
         ret += ' AUTO_INCREMENT'
+    if defaults and defaults.has_key(field_name):
+        ret += ' DEFAULT ' + str(defaults[field_name])
     return ret
 
-def build_field_descriptor(fields, primary_key, auto_inc=None):
+def build_field_descriptor(fields, primary_key, auto_inc=None, defaults=None):
     """Returns a field descriptor for table creation.
 
     This returns a string consisting of the part of the CREATE TABLE statement that describes the
@@ -41,7 +43,7 @@ def build_field_descriptor(fields, primary_key, auto_inc=None):
     <field_type>'.
     """
     field_pairs = (field.split() for field in fields)
-    ret = ', '.join(encode_field_pair(pair, primary_key, auto_inc) for pair in field_pairs)
+    ret = ', '.join(encode_field_pair(pair, primary_key, auto_inc, defaults) for pair in field_pairs)
     return '(' + ret + ')'
 
 def build_create_command(table_name, overwrite=False):
@@ -60,11 +62,11 @@ def run_query(conn, query, commit=False):
         conn.commit()
     return cursor
 
-def create_table(conn, name, fields, primary_key, auto_inc=None, overwrite=False, dummy=False):
+def create_table(conn, name, fields, primary_key, auto_inc=None, overwrite=False, defaults=None, dummy=False):
     "Creates a database table based on the provided specification."
     try:
         command = build_create_command(name, overwrite=overwrite)
-        field_desc = build_field_descriptor(fields, primary_key, auto_inc)
+        field_desc = build_field_descriptor(fields, primary_key, auto_inc, defaults=defaults)
         query = command + " " + field_desc
         if dummy:
             print query
@@ -122,7 +124,7 @@ def test_fpenc():
     print encode_field_pair(('name', 'VARCHAR(20)'), 'name')
     print encode_field_pair(('name', 'VARCHAR(20)'), 'id', auto_inc='blah')
     print encode_field_pair(('name', 'VARCHAR(20)'), 'id', auto_inc='name')
-    print encode_field_pair(('name', 'VARCHAR(20)'), 'name', auto_inc='id')
+    print encode_field_pair(('name', 'VARCHAR(20)'), 'name', auto_inc='id', defaults={'name': 'NOT NULL', 'id': 0})
     print encode_field_pair(('name', 'VARCHAR(20)'), 'name', auto_inc='name')
     
 
@@ -130,7 +132,7 @@ def test_bfdesc():
     fields = ['name VARCHAR(20)', 'id INT', 'freq DOUBLE']
     primary_key = 'id'
     auto_inc = 'freq'
-    print build_field_descriptor(fields, primary_key)
+    print build_field_descriptor(fields, primary_key, defaults={'id': 0})
     print build_field_descriptor(fields, primary_key, auto_inc)
 
 
@@ -170,13 +172,6 @@ def test():
     test_fpenc()
     separator()
     test_bfdesc()
-    separator()
-    test_error()
-    separator()
-    test_build()
-    separator()
-    test_rquery(conn)
-    separator()
-    test_gcolumn(conn)
-    separator()
-    test_tables(conn)
+
+if __name__ == '__main__':
+    test()
