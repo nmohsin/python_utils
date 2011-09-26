@@ -72,7 +72,7 @@ def create_table(conn, name, fields, primary_key, auto_inc=None, overwrite=False
             run_query(conn, query)
         
     except mdb.Error, e:
-        DB_ERROR("Table creation failed!")
+        DB_ERROR(e, "Table creation failed!")
 
 def drop_table(conn, name):
     "Drops a table from the current database."
@@ -80,7 +80,7 @@ def drop_table(conn, name):
         query = "drop table " + name
         run_query(conn, query)
     except mdb.Error, e:
-        DB_ERROR("Table drop failed!")
+        DB_ERROR(e, "Table drop failed!")
 
 def get_rows(cursor):
     "Returns the rows of the fetch operation represented by this cursor."
