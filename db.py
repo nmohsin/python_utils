@@ -13,6 +13,11 @@ import MySQLdb as mdb
 import sys
 import logging
 
+def connection(host, uname, pwd, dbname):
+    "Returns a connection to a MySQL database."
+    conn = mdb.connect(host, uname, pwd, dbname)
+    return conn
+
 def encode_field_pair(field_pair, primary_key, auto_inc=None):
     """Encodes a (field_name, type_description) pair as a string for the SQL CREATE TABLE
     statement. The primary key and auto-incrementing field (if any) are to be specified by name.
@@ -55,13 +60,16 @@ def run_query(conn, query, commit=False):
         conn.commit()
     return cursor
 
-def create_table(conn, name, fields, primary_key, auto_inc=None, overwrite=False):
+def create_table(conn, name, fields, primary_key, auto_inc=None, overwrite=False, dummy=False):
     "Creates a database table based on the provided specification."
     try:
         command = build_create_command(name, overwrite=overwrite)
         field_desc = build_field_descriptor(fields, primary_key, auto_inc)
         query = command + " " + field_desc
-        run_query(conn, query)
+        if dummy:
+            print query
+        else:
+            run_query(conn, query)
         
     except mdb.Error, e:
         DB_ERROR("Table creation failed!")
