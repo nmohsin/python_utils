@@ -49,7 +49,7 @@ def build_field_descriptor(fields, primary_key, auto_inc=None, defaults=None):
 def build_create_command(table_name, overwrite=False):
     "Builds part of the table creation SQL query."
     command = 'CREATE TABLE '
-    if overwrite:
+    if not overwrite:
         command += 'IF NOT EXISTS '
     command += table_name
     return command
