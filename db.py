@@ -58,7 +58,11 @@ def build_create_command(table_name, overwrite=False):
 def run_query(conn, query, commit=False):
     "Executes an SQL query."
     cursor = conn.cursor()
-    cursor.execute(query)
+    try:
+        cursor.execute(query)
+    except mdb.Error, e:
+        DB_ERROR(e, "Failed query: %s" % query)
+        raise
     if commit:
         conn.commit()
     return cursor
