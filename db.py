@@ -29,6 +29,7 @@ def encode_field_pair(field_pair, primary_key, auto_inc=None, defaults=None):
     ret = field_name + " " + type_desc
     if field_name == primary_key:
         ret += ' PRIMARY KEY'
+        primary_key = None
     if field_name == auto_inc:
         ret += ' AUTO_INCREMENT'
     if defaults and defaults.has_key(field_name):
