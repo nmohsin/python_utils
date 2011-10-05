@@ -93,6 +93,16 @@ def get_rows(cursor):
     "Returns the rows of the fetch operation represented by this cursor."
     return cursor.fetchall()
 
+def get_all_tables(conn):
+    "Returns a list of all the tables in the given database."
+    query = "SHOW TABLES";
+    return [elem[0] for elem in get_rows(run_query(conn, query))]
+
+def count_table_rows(conn, table_name):
+    "Returns the number of rows in the given table."
+    query = "SELECT COUNT(*) FROM %s" % table_name
+    return get_rows(run_query(conn, query))[0][0]
+
 def get_column(conn, table_name, column_name, limit=None):
     "Returns a list of the contents of a single column in a table."
     try:
@@ -168,15 +178,20 @@ def test_tables(conn):
     print get_rows(run_query(conn, 'desc foobar'))
     drop_table(conn, 'foobar')
     print get_rows(run_query(conn, 'show tables'))
+
+def test_size(conn):
+    print count_table_rows(conn, 'Writers')
+    print count_table_rows(conn, 'adj_freqs')
+
+def test_get(conn):
+    print get_all_tables(conn)
     
 def separator():
     print '########################################\n'
     
 def test():
     conn = mdb.connect('localhost', 'test', 'testpass', 'testdb')
-    test_fpenc()
-    separator()
-    test_bfdesc()
+    test_get(conn)
 
 if __name__ == '__main__':
     test()
