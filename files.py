@@ -80,3 +80,10 @@ def getsize(path, ignorefunc=None):
                 continue
             ret += os.path.getsize(fpath)
     return ret
+
+def format_size(size):
+    "Return a file size in a human readable format."
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if size < 1024.0:
+            return "%3.1f%s" % (size, unit)
+        size /= 1024.0
