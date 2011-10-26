@@ -88,6 +88,13 @@ def drop_table(conn, name):
         run_query(conn, query)
     except mdb.Error, e:
         DB_ERROR(e, "Table drop failed!")
+        
+def drop_all_tables(conn):
+    "Drop all the tables in this DB."
+    names = get_all_tables(conn)
+    for name in names:
+        drop_table(conn, name)
+    print 'Dropped %d tables' % len(names)
 
 def get_rows(cursor):
     "Returns the rows of the fetch operation represented by this cursor."
