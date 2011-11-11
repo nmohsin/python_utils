@@ -16,6 +16,7 @@ import nltk.tokenize
 import nltk.tag.util
 import re
 from utils.decorators import memoized
+from utils import files
 
 
 ############################## CONVENIENCE FUNCTIONS ###############################################
