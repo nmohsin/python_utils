@@ -7,4 +7,5 @@ The following types of functionality are found here:
 - sorting.py: Common types of sorting.
 - decorators.py: Function decorators I often use.
 - db.py: Functions for programatically manipulating databases.
+- swn.py: Interface to SentiWordNet.
 """
